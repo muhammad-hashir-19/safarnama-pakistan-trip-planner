@@ -275,7 +275,22 @@ function simulate(stops, ctx) {
 
 // ---------------------------------------------------------------- selection
 
-const PASS_THROUGH_PENALTY = 0.75; // hours; discourages driving back through a town you already stayed in
+const PASS_THROUGH_PENALTY = 2; // hours; discourages driving back through a town you already stayed in
+
+// Interests the current route already serves well (2+ matching sights).
+function coveredInterests(stops, interests) {
+  const count = new Map();
+  for (const s of stops) for (const a of s.attractions) for (const t of a.tags) count.set(t, (count.get(t) || 0) + 1);
+  return new Set(interests.filter((i) => (count.get(i) || 0) >= 2));
+}
+
+// How much a base adds to the trip: its best sights, scaled by how famous the
+// base is (Hunza beats a town with a few local temples), plus a bonus for
+// each of the traveller's interests nothing else on the route serves yet.
+function hubValue(hub, core, covered, interests) {
+  const fresh = interests.filter((i) => !covered.has(i) && core.picked.some((a) => a.tags.includes(i))).length;
+  return core.value * (0.5 + hub.popularity) + fresh * 3;
+}
 
 function routeTravel(stops, router) {
   const stopIds = new Set(stops.map((s) => s.hubId));
@@ -332,6 +347,7 @@ function selectStops(ctx, maxStops) {
   while (stops.length >= 2 && stops.length < maxStops) {
     let best = null;
     const baseTravel = routeTravel(stops, router);
+    const covered = coveredInterests(stops, ctx.interests);
     for (const hub of candidates) {
       if (stops.some((s) => s.hubId === hub.id)) continue;
       const core = coreSet(hub, ctx);
@@ -340,7 +356,7 @@ function selectStops(ctx, maxStops) {
         const trial = [...stops.slice(0, pos), { hubId: hub.id, attractions: core.picked }, ...stops.slice(pos)];
         const addedTravel = routeTravel(trial, router) - baseTravel;
         if (!Number.isFinite(addedTravel)) continue;
-        const ratio = core.value / (addedTravel + core.hours + 1);
+        const ratio = hubValue(hub, core, covered, ctx.interests) / (addedTravel + core.hours + 1);
         if (best && ratio <= best.ratio) continue;
         if (!simulate(trial, ctx).fits) continue;
         best = { ratio, trial };
