@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Safarnama — Pakistan Trip Planner</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">◆</span>
+      <div>
+        <h1>Safarnama</h1>
+        <p>Day-by-day Pakistan itineraries that follow the roads, not a zig-zag.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <form id="trip-form" class="panel form" autocomplete="off">
+      <h2>Your trip</h2>
+
+      <div class="row two">
+        <label>Arriving in
+          <select name="entry" id="entry"></select>
+        </label>
+        <label>Leaving from
+          <select name="exit" id="exit"><option value="">Same city</option></select>
+        </label>
+      </div>
+
+      <div class="row two">
+        <label>Start date
+          <input type="date" name="startDate" id="startDate" required />
+        </label>
+        <label>Days
+          <input type="number" name="days" min="1" max="30" value="10" required />
+        </label>
+      </div>
+
+      <div class="row two">
+        <label>Budget per person
+          <span class="money">
+            <input type="number" name="budget" min="1" step="1" value="1200" required />
+            <select name="currency" aria-label="Currency">
+              <option value="USD">USD</option>
+              <option value="PKR">PKR</option>
+            </select>
+          </span>
+        </label>
+        <label>Travellers
+          <input type="number" name="travelers" min="1" max="20" value="2" />
+        </label>
+      </div>
+
+      <fieldset>
+        <legend>What are you into?</legend>
+        <div id="interests" class="chips"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Pace</legend>
+        <div class="seg" id="pace">
+          <label><input type="radio" name="pace" value="relaxed" /> <span>Relaxed</span></label>
+          <label><input type="radio" name="pace" value="balanced" checked /> <span>Balanced</span></label>
+          <label><input type="radio" name="pace" value="packed" /> <span>Packed</span></label>
+        </div>
+      </fieldset>
+
+      <label class="check"><input type="checkbox" name="allowFlights" checked /> Use domestic flights for long hops</label>
+      <label class="check"><input type="checkbox" name="preferScenic" checked /> Prefer scenic roads when it costs little extra time</label>
+
+      <button type="submit" class="primary" id="submit">Plan my trip</button>
+      <p class="fine">Costs are rough estimates. Always check your government's travel advisory and road conditions.</p>
+    </form>
+
+    <section id="results" class="results" aria-live="polite">
+      <div class="empty panel" id="empty">
+        <h2>Tell us about your trip</h2>
+        <p>Pick your interests, dates and budget. You'll get a route that visits each place once, in an order that makes sense on the map, with every day planned.</p>
+      </div>
+    </section>
+  </main>
+
+  <template id="results-tpl">
+    <div class="panel summary">
+      <div class="route" id="route"></div>
+      <div class="stats" id="stats"></div>
+      <div class="costs" id="costs"></div>
+      <div id="warnings"></div>
+      <div class="ai-row">
+        <button type="button" id="ai-btn" class="secondary">✨ Add AI guide notes</button>
+        <span id="ai-status" class="fine"></span>
+      </div>
+      <div id="ai-overview"></div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" class="tab on" data-tab="plan" aria-selected="true">Day-by-day plan</button>
+      <button type="button" role="tab" class="tab" data-tab="stays" aria-selected="false">Hotels &amp; food</button>
+    </div>
+
+    <section id="tab-stays" class="stays" hidden>
+      <div class="panel stays-bar">
+        <div class="seg small" id="stay-kind">
+          <label><input type="radio" name="stayKind" value="hotels" checked /> <span>Hotels</span></label>
+          <label><input type="radio" name="stayKind" value="restaurants" /> <span>Restaurants</span></label>
+        </div>
+        <label>Price
+          <select id="stay-price">
+            <option value="">Any price</option>
+            <option value="budget">Budget</option>
+            <option value="mid">Mid-range</option>
+            <option value="upscale">Upscale</option>
+          </select>
+        </label>
+        <label>Style
+          <select id="stay-style">
+            <option value="">Anything</option>
+            <option value="relaxing">Relaxing / scenic</option>
+            <option value="central">Central (near sights)</option>
+            <option value="local">Local food (restaurants)</option>
+          </select>
+        </label>
+        <label class="check"><input type="checkbox" id="stay-contact" /> Only with phone or website</label>
+      </div>
+      <div id="stays-list"></div>
+    </section>
+
+    <div id="tab-plan">
+    <div class="panel map-panel">
+      <div class="day-filter" id="day-filter"></div>
+      <div id="map"></div>
+      <div class="legend">
+        <span><i class="ln road"></i> Road</span>
+        <span><i class="ln scenic"></i> Scenic road</span>
+        <span><i class="ln flight"></i> Flight</span>
+        <span><i class="ln jeep"></i> Jeep / hike</span>
+      </div>
+    </div>
+
+    <div id="days" class="days"></div>
+
+    <div class="panel" id="tips"></div>
+    </div>
+  </template>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js" type="module"></script>
+</body>
+</html>

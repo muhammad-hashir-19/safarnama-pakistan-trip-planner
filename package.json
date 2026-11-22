@@ -1,0 +1,22 @@
+{
+  "name": "pakistan-travel-guide",
+  "version": "0.1.0",
+  "description": "Itinerary planner for visitors to Pakistan: interests + budget + days -> a day-by-day plan with no backtracking, plus a route map.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js",
+    "discover": "node scripts/discover.js",
+    "discover:ai": "node scripts/discover.js --ai",
+    "stays": "node scripts/stays.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
+    "express": "^4.21.2"
+  }
+}
