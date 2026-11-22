@@ -286,15 +286,30 @@ function renderStays(plan) {
       (!price || x.price === price) &&
       (!style || x[style]) &&
       (!contactOnly || x.phones.length || x.website));
+    const LIMIT = 24;
+    const cards = (list) => list.map((x) => stayCard(x, kind, s.name, planPrice)).join("");
     const body = items.length
-      ? `<div class="stay-grid">${items.slice(0, 24).map((x) => stayCard(x, kind, s.name, planPrice)).join("")}</div>`
+      ? `<div class="stay-grid">${cards(items.slice(0, LIMIT))}</div>` +
+        (items.length > LIMIT
+          ? `<button type="button" class="secondary show-all" data-hub="${esc(s.id)}">Show all ${items.length}</button>`
+          : "")
       : `<p class="fine">${all.length ? "Nothing matches these filters here — try loosening them." : "No listings found on OpenStreetMap for this place yet."}</p>`;
-    return `<section class="panel stay-section">
-      <h3>${esc(s.name)} <span class="fine">· ${s.nights} night${s.nights > 1 ? "s" : ""} · ${items.length} of ${all.length} shown</span></h3>
+    return `<section class="panel stay-section" data-hub="${esc(s.id)}">
+      <h3>${esc(s.name)} <span class="fine">· ${s.nights} night${s.nights > 1 ? "s" : ""} · ${items.length} match${items.length === 1 ? "" : "es"}${items.length !== all.length ? ` (of ${all.length})` : ""}</span></h3>
       ${body}
     </section>`;
   });
-  $("#stays-list").innerHTML =
+  const list = $("#stays-list");
+  list.onclick = (e) => {
+    const btn = e.target.closest(".show-all");
+    if (!btn) return;
+    const stop = overnightStops(plan).find((s) => s.id === btn.dataset.hub);
+    const items = (staysData.hubs[stop.id]?.[kind] || []).filter((x) =>
+      (!price || x.price === price) && (!style || x[style]) && (!contactOnly || x.phones.length || x.website));
+    btn.previousElementSibling.innerHTML = items.map((x) => stayCard(x, kind, stop.name, planPrice)).join("");
+    btn.remove();
+  };
+  list.innerHTML =
     (sections.join("") || '<div class="panel fine">This trip has no overnight stays.</div>') +
     `<p class="fine stays-note">Listings ${esc(staysData.source)}. Price levels are estimates; your plan's
       ${esc(plan.costs.label)} style matches <b>${esc(PRICE_LABEL[planPrice])}</b>. Call or message ahead to confirm rates and availability.</p>`;

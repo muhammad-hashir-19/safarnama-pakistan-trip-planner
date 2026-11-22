@@ -51,6 +51,24 @@ The result goes to `src/data/discovered.json`. The app merges it with the hand-t
 
 Base towns and the roads between them are still hand-entered in `places.js`. Driving times through the mountains need to be accurate, and map distances aren't. The script lists famous places that are too far from every base (e.g. Harappa, Ranikot Fort, Hingol) as candidates for new bases.
 
+## Hotels & restaurants
+
+The **Hotels & food** tab lists places to stay and eat in each town where the trip stops overnight. Data comes from OpenStreetMap:
+
+```powershell
+npm run stays
+```
+
+This takes about an hour, because OpenStreetMap's public server is slow and the script waits between requests. It writes `src/data/stays.json`.
+
+- Each listing shows the phone number (with a tap-to-call link), a WhatsApp link for Pakistani mobile numbers, and the website and email when OpenStreetMap has them.
+- Every listing also has Google Maps and Booking.com search links, because many smaller places have no contact details in OpenStreetMap.
+- Price level (Budget / Mid-range / Upscale) and the "Relaxing" and "Central" labels are **estimates**, based on the type of place, its name, its amenities and its distance from the town centre. OpenStreetMap rarely includes prices or star ratings for Pakistan.
+
+## Deployment
+
+The app is live at https://safarnama-pakistan-trip-planner.vercel.app on Vercel's free Hobby plan. Pushing to `main` on GitHub redeploys it automatically. `api/index.js` and `vercel.json` run the Express app as a serverless function and serve `public/` as static files. AI notes are off in production because no `ANTHROPIC_API_KEY` is set there.
+
 ## How it avoids zig-zag plans
 
 The route and schedule are built by ordinary code, not by the AI. A language model can't be trusted to keep geography straight. Claude only writes descriptions of a plan that is already fixed.
