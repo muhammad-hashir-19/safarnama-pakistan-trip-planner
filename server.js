@@ -70,8 +70,14 @@ app.post("/api/narrate", async (req, res) => {
   }
 });
 
-const port = Number(process.env.PORT) || 3000;
-app.listen(port, () => {
-  console.log(`Pakistan travel guide running at http://localhost:${port}`);
-  if (!aiAvailable()) console.log("(AI narrative disabled — set ANTHROPIC_API_KEY to enable it)");
-});
+export default app;
+
+// On Vercel the app is imported by api/index.js and run as a serverless
+// function; everywhere else, start a normal server.
+if (!process.env.VERCEL) {
+  const port = Number(process.env.PORT) || 3000;
+  app.listen(port, () => {
+    console.log(`Pakistan travel guide running at http://localhost:${port}`);
+    if (!aiAvailable()) console.log("(AI narrative disabled — set ANTHROPIC_API_KEY to enable it)");
+  });
+}
